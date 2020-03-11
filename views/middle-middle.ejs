@@ -1,0 +1,24 @@
+<div id="middle_middle"> 
+    <% include middle_side.ejs %>
+    <div id="board">
+        <div id="board1">
+            <div id="board_top">
+                <% include player_navbar.ejs %>
+                
+            </div>
+            <div id="board_board">
+                <div id="board_board1">
+                    <div id="chessboard">
+                            <% include board.ejs %>
+                    </div>
+                    
+                    <% include board_side.ejs %>
+                </div>
+            </div>
+            <div id="board_buttom">
+                    <% include player_navbar.ejs %>
+            </div>
+        </div>
+    </div>
+    
+</div>

@@ -1,0 +1,102 @@
+<header id="header">  
+    <style>
+     nav div:hover{
+          opacity: 0.5;
+          cursor: pointer;
+     }    
+     
+     nav div img{
+         padding: 0;
+         margin: 0;
+         position:absolute;
+     }
+     #profile_pic{
+        border-radius: 15px;
+     }
+     .notification{
+         
+         background-color: red;
+         z-index: 2;
+         position: absolute;
+         border-radius: 50%;
+         /* background-image: url(../staticassets/images/notif.jpg); */
+         width: 8px;
+         height: 8px;
+         
+     }
+     
+    
+
+    </style>
+    <div id="home">
+        Home 
+        <img src="" alt="">
+    </div>
+    <div id="nav_search">
+        <label for="search"> Search</label>
+        <input type="text" id="search">
+        
+    </div>
+    <nav id="buttons">
+        <div  hidden id="hidden_notification" style="display: none;"> <%= ejs_attributes.notifs %>  </div>
+        <div>
+            <img src="staticassets/board/images/challenges.png" alt="" width="30" height="30" id="challenges_pic" title="challenges"></img>
+            <span class="notification"></span>
+        </div>
+        
+        <div>
+            <img src="staticassets/board/images/requests.png" alt="" width="30" height="30" id="requests_pic" title="requests"></img>
+            <span class="notification"></span>
+        </div>
+        
+
+        <div  onclick="show_messenger()">
+            <img src="staticassets/board/images/Message-icon-grey.png" alt="" width="30" height="30" id="message_pic" title="messages">
+        </img>
+          <span id="message_notif" class="notification" style="font-size:x-small;display: none;"></span>
+        </div>
+        <div>
+        <img src="staticassets/images/profile_pics/<%= ejs_attributes.username %>.JPEG"  onerror="this.onerror=null;this.src='staticassets/images/profile_pics/default.JPEG';" alt="" width="30" height="30" id="profile_pic" title="profile" onclick="profile_page_link()">
+           
+            </img>
+        </div>
+        
+        <script>
+            function ifin(x,sl){
+          for (let i=0; i<sl.length; i++){
+              if (sl[i]==x){
+                  return true;
+              }else if(i==sl.length-1){return false};
+          }
+  
+      }
+            
+            var get_cookies = function() {
+                var cookies = {};
+                //console.log(request.headers.cookie)
+                document.cookie && document.cookie.split(';').forEach(function(cookie) {
+                var parts = cookie.match(/(.*?)=(.*)$/)
+                cookies[ parts[1].trim() ] = (parts[2] || '').trim();
+                });
+                return cookies;
+            };
+            function profile_page_link(){
+                let lin=get_cookies()['uname'];
+                if(lin){
+                    window.location=`http://localhost/${lin}`
+                }
+            }
+        </script>
+        <% if(ejs_attributes && ejs_attributes.mread==false){ %>
+          <script>
+             document.getElementById('message_notif').style.display="block";
+             
+          </script>
+            
+        <% } %> 
+        
+    
+    </nav> 
+
+</header>
+

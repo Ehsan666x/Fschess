@@ -1,0 +1,35 @@
+<style>
+    #messenger_body{
+        overflow: auto;
+    }
+</style>
+<head>
+  <link rel="stylesheet" href="staticassets/css/messenger.css">
+</head>
+
+<div id="messenger">
+    
+    <button id="messenger_close" onclick="m_cloce()">X</button>
+    <div id="messenger_container">
+    
+        <div id="messenger_sidebar_container">
+            
+        </div>
+        <div id="messenger_body_container">
+            
+            <div id="messenger_body_container2">
+                <div id="messenger_body">messages</div>
+                <div id="messenger_input_container">
+                    
+                   <label>receiver <input type="text" id="receiver"></label>
+                    <textarea name="" id="message" cols="30%" rows="5%" onclick="change_color()"></textarea>
+                    <button onclick="send_message()"> send</button>
+                </div>
+            </div>
+               
+        </div>
+        
+    </div>
+
+</div>
+

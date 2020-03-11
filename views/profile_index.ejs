@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="staticassets/layout/ejs.js"></script>
+    <script src="/staticassets/js/socketio.js"></script>
+    <link rel="stylesheet" href="staticassets/layout/frontlayout.css">
+    <link rel="next" href="staticassets/layout/middle-middle.ejs">
+    <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+    <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
+
+    
+    <script defer src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
+    <script defer src="https://unpkg.com/filepond-plugin-image-resize/dist/filepond-plugin-image-resize.js"></script>
+    <!-- <script defer src="https://unpkg.com/filepond-plugin-image-crop/dist/filepond-plugin-image-crop.js"></script> -->
+    <script src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
+    <!-- <script src="https://unpkg.com/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.js"></script> -->
+    <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
+    <script defer src="https://unpkg.com/filepond/dist/filepond.js"></script>
+
+    <script defer src="staticassets/js/profilepage_filepond.js"></script>
+      
+    <title>Layout</title>
+</head>
+<body> 
+    <div>
+        <% include Calendar.ejs %>
+    </div>
+    <div>
+        <% include messenger.ejs %>
+    </div>
+    <div id="container">
+        
+
+        <% include header.ejs %>
+        
+
+        <% include profile_main.ejs %>
+        
+
+    </div>
+    
+    <script src="staticassets/js/homepage2.js"></script>
+    <script src="staticassets/js/messenger.js"></script>
+    <script src="staticassets/js/profile_chat.js"></script>
+    
+</body>
+</html>

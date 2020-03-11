@@ -1,0 +1,102 @@
+
+
+<div id="profile">
+    <style>
+     #notepad_save{
+         display: none;
+     }
+     #notepad_cancel{
+         display:none;
+     }
+     #description_save{
+         display: none;
+     }
+     #description_cancel{
+         display: none;
+     }
+     
+    #file{
+        position: relative;
+    }
+    #default_profile_pic{
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+    }
+    #change{
+       position: relative;
+       top:0;        
+    }
+     .filepond--root{
+         padding: 0;
+         margin: 0;
+     }
+     .filepond{
+             opacity: 0;
+             bottom: 0;
+         }
+    .filepond:hover{
+        opacity: 0.9;
+    }
+     
+    
+    </style>
+    <div id="profile1">
+        <div id="profile_top">
+            <div id="profile_top1">
+                <div id="profile_left">
+                    <div id="file"> 
+                        <img src="staticassets/images/profile_pics/<%= ejs_attributes.username %>.JPEG" id="default_profile_pic"  onerror="this.onerror=null;this.src='staticassets/images/profile_pics/default.JPEG';">
+                        <div id="change">
+                            <input type="file" name="file_img" class="filepond">
+                        </div>
+                    </div>
+                    <div id="profile_description_container">
+                        <span style="font-size: smaller;">description:</span>
+                        <p id="profile_description"> <%= ejs_attributes.description %></p>
+                        <button id="description_save" contenteditable="false" onclick="des_save()">save</button>
+                        <button id='description_cancel' contenteditable="false" onclick="des_cancel()">cancel</button>
+                    </div>
+                    <button id="edit_description" onclick="edit_des()">Edit</button>
+                </div>
+                <div id="profile_middle">
+                    <div id="profile_notepad_container">
+                        <span style="font-size: smaller;">note:</span>
+                        <p id="profile_notepad"><%= ejs_attributes.note %></p>
+                        <button id="notepad_save" contenteditable="false" onclick="note_save()">save</button>
+                        <button id='notepad_cancel' contenteditable="false" onclick="note_cancel()">cancel</button>
+                    </div>
+                    <button id="edit_notepad" onclick="edit_note()">Edit</button>
+                    <div id="profile_enterclass"><button>Enter Class</button></div>
+                </div>
+                <div id="profile_score">
+                    <p>Title:<%= ejs_attributes.role %></p>
+                    <p>Rapid:<%= ejs_attributes.rapid %></p>
+                    <p>Blitz:<%= ejs_attributes.blitz %></p>
+                    <p>Classic:<%= ejs_attributes.classic %></p>
+                    <p>Fide:<%= ejs_attributes.fide %></p>
+                </div>
+                <div id="profile_right">
+                    <div id="profile_messages">Messages</div>
+                    <div id="profile_recieved_requests">Recieved requests</div>
+                    <div id="profile_sent_requests">sent requests</div>
+                    <div id="profile_your_challenges">Your challenges</div>
+                    <div id="profile_followers">Followers</div>
+                    <div id="profile_settigs">Settings</div>
+                </div>
+                <button id="profile_calendar" onclick="show_calendar()">Calendar</button>
+                
+            </div>
+        </div>
+
+        <div id="profile_btn">
+            <div id="profile_btn1">
+                <div id="current_game"><p>Current game</p> </div>
+                <div id="All_games"><p> All games</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="staticassets/js/profilepage.js"></script>

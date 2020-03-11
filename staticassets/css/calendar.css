@@ -1,0 +1,39 @@
+table, th, td {
+    border: 1px solid black;
+  }
+  td{
+      width: 80px;
+      height: 80px;
+      opacity: 0.6;
+      background-color: rgb(219, 217, 109);
+  }
+  tr td:hover{
+    cursor: pointer;
+    opacity: 1;
+   }
+  
+  p{
+      margin: 0;
+      font-size: small;
+  }
+ 
+  #calendar_content{
+      margin-top: 120px;
+      margin-left: 20px;
+  }
+  #calendar_price_save{
+      display: none;
+  }
+  #calendar_price_cancel{
+      display: none;
+  }
+
+  #calendar_container{
+      display: flex;
+      background-color: bisque;
+      position: absolute;
+      display: none;
+      left: 20%;
+      top: 5%;
+      z-index: 1;
+  }

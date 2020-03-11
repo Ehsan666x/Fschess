@@ -1,0 +1,50 @@
+#messenger_container{
+    display: flex;
+    background-color: burlywood;
+    width: 98%;
+    height: 95%;
+    position: absolute;
+    bottom: 0;
+    word-break: break-all;
+    
+}
+
+#messenger{
+    position: absolute;
+    width: 30%;
+    height: 60%;
+    right: 25%;
+    top: 5%;
+    z-index: 2;
+    background-color: rgb(4, 42, 51);
+    display: none;
+    
+}
+
+#messenger_sidebar_container{
+    flex: 0.4;
+    background-color: cornflowerblue;
+}
+#messenger_body_container{
+    flex: 1;
+}
+#messenger_body_container2{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+#messenger_body{
+    flex: 1;
+    background-color: rgb(201, 190, 177);
+}
+#messenger_input_container{
+    flex: 0.3;
+}
+#messenger_close{
+    right: 0;
+    position: absolute;
+}
+
+#message{
+    height: 70%;
+}

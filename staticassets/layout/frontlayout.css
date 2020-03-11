@@ -1,0 +1,635 @@
+
+body{
+    position: absolute;
+    margin:0;
+    padding:0;
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+    
+}
+
+
+#container{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    
+    
+    
+    
+}
+
+/* navbar //////////////////////////////////////////////////////////////////////////////////////////*/
+
+#header0{
+    flex:0.2;
+    max-width: 100%;
+}
+
+
+header{
+    background-color:rgb(109, 109, 212);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-height: 100%; 
+}
+
+header nav{
+    padding: 0;
+    height: 35px;
+    position: relative;
+}
+
+header nav div{
+    display: inline-block;
+    padding: 5px;
+    width: 30px;
+    height: 30px;
+    top: 0;
+    position: relative;
+    
+    
+}
+#home{
+    margin: 8px;
+}
+
+/* profile //////////////////////////////////////////////////////////////////////////////////////////*/
+
+#profile{
+    flex:0.4;
+    
+   
+}
+
+#profile1{
+    display: flex;
+    flex-direction: column;
+    
+    background-color:whitesmoke;
+    max-height: 100%;
+    
+}
+
+
+/* main //////////////////////////////////////////////////////////////////////////////////////////*/
+#main0{
+    flex:auto;
+    width: 100%;
+    height: 100%;
+    
+}
+
+
+
+#main{
+    clear: both;
+    display: flex;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    margin:0px;
+    overflow: auto;
+    
+}
+
+
+
+
+/* sidebar /////////////////////////////////////////////////////////////////////////*/
+
+#sidebar{
+    
+    background-color: blueviolet;
+    flex: 2;
+    height: 100%;
+    max-height: 100%;
+    
+}
+#sidebar1{
+    
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+
+#Coaching{
+    
+    flex:1;
+    width: 100%;
+    
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border: solid 1px;
+    
+    border-bottom-style: none;   
+}
+#livegames{
+    flex:1;
+    height: 15%;
+}
+#Tournaments{
+    flex:1;
+    height: 15%;
+}
+#Followed{
+    flex:4;
+    height: 55%;
+    background-color: brown;
+    overflow: auto;
+}
+
+
+
+/* middle //////////////////////////////////////////////////////////////////////////////////////////*/
+
+#middle{
+    background-color: aquamarine;
+    flex: auto;
+    overflow: auto;
+    
+}
+
+
+#middletop h3{
+    background: rebeccapurple;
+    margin: 0px;
+    padding: 5px;
+    display: block;
+}
+
+#middle_middle{
+    display: flex;
+    background-color: blanchedalmond;
+    
+    margin: 0px;
+    padding: 0px; 
+    
+    
+}
+#middle_side{
+    flex: 1;
+    
+    margin: 0px;
+    padding: 0px;
+    display: flex;
+    flex-direction: column;
+}
+#board{
+    
+    flex:2;
+    height: 100%;
+    
+    margin: 0px;
+    padding: 0px; 
+    
+    height: 100%;
+    
+}
+
+
+#board1{
+    
+    display: flex;
+    
+    flex-direction: column;
+    /*  */
+    margin: 0px;
+    padding: 0px; 
+    bottom: 0px;
+    height: 100%;
+    
+}
+
+
+#board_top{
+    flex: auto;
+    margin: 0px;
+    padding: 0px;
+     
+}
+#board_board{
+    height: 580px;
+    margin: 0px;
+    padding: 0px;
+     
+   
+}
+#boardtest{
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-wrap: wrap;
+}
+.sqr{
+    display: flex;
+    width: 12%;
+    height: 12%;
+    margin: 0;
+    padding: 0;  
+    
+    background-color: blue;
+}
+
+#board_bottom{
+    flex: auto;
+    margin: 0px;
+    padding: 0px;
+     
+}
+
+#board_board1{
+    display: flex;
+    height: 100%;
+    bottom: 0px;
+     
+}
+
+#chessboard{
+    
+    left: 0px;
+    width: 580px;
+
+    
+    background-color : silver;
+    
+    
+}
+
+#play_timecontrol{
+    position: absolute;
+    right: 0px;
+    width: 120px;
+    height: 500px;
+    display: flex;
+    flex-wrap: wrap;
+    
+    display: none;
+    background-color: antiquewhite;
+}
+#play_timecontrol .play_timecontrol_btn{
+    width: 58px;
+    left: 0;
+    height: auto;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    
+    text-align: center;
+}
+
+
+#board_side{
+    
+    flex: auto;
+    
+    
+    
+}
+
+.board_side_botton{
+    
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    
+    
+}
+
+#board_side p{
+    text-align: center;
+}
+
+#middle_buttom{
+  display: flex;
+}
+#replay{
+    height: 200px;
+    background-color: rgb(98, 226, 59)
+}
+
+.replaylist{
+   display: flex;
+   
+}
+.replay_move{
+    flex:1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+
+}
+
+#replaybox{
+    display: flex;
+    height: 20%;
+    
+    justify-content: center;
+    align-content: center;
+}
+#replay_area{
+    background-color: beige;
+    height: 73%;
+    margin-top: 2%;
+    margin-right: 2%;
+    margin-left: 2%;
+    overflow: auto;
+}
+
+#livelist{
+    
+    height: 300px;
+    background-color: rgb(189, 108, 41)
+}
+#livelistbox{
+    display: flex;
+    height: 10%;
+    justify-content: center;
+    align-content: center;
+}
+#livelist_area{
+    background-color: beige;
+    height: 75%;
+    margin-top: 2%;
+    margin-right: 2%;
+    margin-left: 2%;
+    overflow: auto;
+}
+
+.replay_btn {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    height: 100%;
+    width: 25%;
+    
+}
+.replay_btn p{
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    padding: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+#PGN{
+    height: 150px;
+    background-color: rgb(92, 138, 78)
+}
+
+
+#edit_top{
+    display: flex;
+    margin: 0px;
+    padding: 0px;
+    
+    height: 100%; 
+ }
+ 
+.edit_tb_btn{
+    height: 100%;
+    width: 50px;
+    margin: 0;
+    padding: 0;
+    
+    align-items: center;
+    display: flex;
+    justify-content: center;
+
+}
+.edit_tb_btn img{
+    width: 40px;
+    left:15px;
+    
+}
+
+#edit_btm{
+    display: flex;
+    margin: 0px;
+    padding: 0px;
+    
+    height: 100%; 
+ }
+
+ .edit_side_botton{
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    
+    
+    
+}
+#game_type{
+    display: flex;
+    margin: 0px;
+    padding: 0px;
+    
+    height: 100%; 
+}
+.game_type_btn{
+    display: flex;
+    width: 33%;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    
+    
+}
+.game_type_btn p{
+   margin: 0px;
+   padding: 10px;
+}
+
+
+#about{
+    height: 200px;
+    
+    background-color: black;
+    color: azure;
+}
+
+
+
+
+/* chat ///////////////////////////////////////////////////////////////////////////////////////// */
+
+.chat{
+    position: relative;
+    height: 100%;
+    width: 100%;
+    background-color: rgb(109, 63, 63);
+    flex: 9;
+    bottom: 0;
+    
+}
+#chat1{
+   display: flex;
+   position: relative;
+   flex-direction: column;
+   height: 100%;
+   width: 98%;
+   overflow: auto;
+   word-break: break-all;
+   
+}
+
+
+#chatbox{
+    background-color: beige;
+    overflow: auto;
+    position: relative;
+    height: 90%;
+    flex: auto;
+    margin-right: 2%;
+    margin-left: 2%;
+    border: solid;
+    text-overflow: ellipsis;
+    
+}
+.chat_message{
+    
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+
+}
+.p_message{
+   
+    padding: 2px;
+    margin: 0;
+    
+}    
+
+#chat_form{
+    
+    bottom: 0;
+    height: 100px;
+    
+    
+}
+textarea {
+    resize: none;
+    margin: 5px;
+    margin-bottom: 0;
+ }
+
+ #test{
+     color:blue;
+ }
+
+
+/* profile ///////////////////////////////////////////////////////////////////////////////////// */
+
+#profile_top{
+    flex:1;
+}
+
+#profile_btn{
+    flex:0.1;
+}
+#profile_btn1{
+    display: flex;
+    height: 100%;
+    
+}
+#current_game{
+    flex: 1;
+    
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    
+
+}
+#current_game p{
+    padding-top: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+#All_games{
+    flex: 1;
+    
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    
+}   
+#All_games p{
+    padding-top: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}  
+#profile_top1{
+    display: flex;
+    
+    height: 100%;
+}
+#profile_left{
+   flex:0.8;
+   position: relative;
+   
+}
+#profile_middle{
+  flex:1;
+  
+}
+#profile_score{
+  flex:0.3;
+  
+}
+#profile_right{
+   flex:0.5;
+   
+}
+#profile_calendar{
+    flex:1;
+    
+}
+
+/* /////////////////////////////////////////// player navbar  */
+#player_navbar{
+      
+    display: flex;
+    align-items: center;
+    
+    
+}
+#player_nav_img{
+      
+      
+    height: 50px;
+    width: 50px;
+}
+#player_nav_name{
+    flex: 1;
+}
+#player_nav_rating{
+    flex: 1;
+    font-size: x-small;
+}
+#other_nav_time{
+    flex: 0.5;
+    text-align: left;
+    font-size: xx-large;
+}
+#my_nav_time{
+    flex: 0.5;
+    text-align: left;
+    font-size: xx-large;
+}

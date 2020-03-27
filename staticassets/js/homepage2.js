@@ -29,6 +29,11 @@ window.onload=function(){
     let fischerandom=false;
     const livegames=document.getElementById('livegames');
     var livegamesbox=document.getElementById('livegamesbox');
+    let X_FEN;
+    let last_X_FEN;
+    let replay_mode=false;
+    let halfmove=0;
+    let fullmove=1;
     let gamest
     let my_prev
     let other_prev
@@ -46,6 +51,7 @@ window.onload=function(){
     let increment;
     let my_consumed_time=[0];
     let other_consumed_time=[0];
+    let my_col;
     // livegames.addEventListener('click', eventhandler);
     // function eventhandler(){
     //     console.log('ask for livegames')
@@ -274,8 +280,10 @@ window.onload=function(){
         board_top.innerHTML=template;
         const Fischer_random=document.getElementById("Fischer_random");
         const Standard=document.getElementById("Standard");
-        Fischer_random.addEventListener("click",function(){game_type="fischerandom"})
-        Standard.addEventListener("click",function(){game_type="standard"});      
+        function game_type_color(){if(game_type=="fischerandom"){Fischer_random.style.fontWeight="bold";Standard.style.fontWeight="normal"}else{Standard.style.fontWeight="bold";Fischer_random.style.fontWeight="normal"}}
+        game_type_color()
+        Fischer_random.addEventListener("click",function(){game_type="fischerandom";game_type_color()})
+        Standard.addEventListener("click",function(){game_type="standard";game_type_color()});      
         
        // socket.emit("game-request",gamedata);
         
@@ -302,7 +310,8 @@ window.onload=function(){
 
  
     socket.on("initials",function(data){
-        
+        halfmove=0;
+        fullmove=1;
         game_mode=true;
         col=data.col;
         if(data.u1){
@@ -373,27 +382,29 @@ window.onload=function(){
                  // SL[0][i].pImage.src=`images/sprites/${SL[0][i].color+ SL[0][i].piece_name}.png`;
               }
               //e.target.removeEventListener("buttondown",btn)
-          }
+              for (let i=0;i<8;i++){for (let j=0;j<8;j++){
+                if (SL[i][j].piece_name!="none"){
+                SL[i][j].pImage=new Image(board.clientWidth/8-1,board.clientHeight/8-1);
+                SL[i][j].pImage.id="pieces"
+                SL[i][j].pImage.already_moved=false;
+                SL[i][j].pImage.src=`staticassets/board/images/sprites/${SL[i][j].color+SL[i][j].piece_name}.png`;
+                SL[i][j].appendChild(SL[i][j].pImage);
+                SL[i][j].pImage.style.position="absolute";
+                SL[i][j].pImage.style.top="0%";
+                SL[i][j].pImage.style.left="0%";
+                        
+                }   
+            }}
+
+            
+        imgs=document.querySelectorAll("#pieces");
+        arr();
+        X_FEN=position_to_FEN();
+        }
           
           
   
-          for (let i=0;i<8;i++){for (let j=0;j<8;j++){
-                  if (SL[i][j].piece_name!="none"){
-                  SL[i][j].pImage=new Image(board.clientWidth/8-1,board.clientHeight/8-1);
-                  SL[i][j].pImage.id="pieces"
-                  SL[i][j].pImage.already_moved=false;
-                  SL[i][j].pImage.src=`staticassets/board/images/sprites/${SL[i][j].color+SL[i][j].piece_name}.png`;
-                //   SL[i][j].appendChild(SL[i][j].pImage);
-                  SL[i][j].pImage.style.position="absolute";
-                  SL[i][j].pImage.style.top="0%";
-                  SL[i][j].pImage.style.left="0%";
-                          
-                  }   
-              }}
-  
-              
-          imgs=document.querySelectorAll("#pieces");
-          lm_arrange(SL);
+         
         
         let pos={a1:`${SL[0][0].piece_name}`,b1:`${SL[0][1].piece_name}`,c1:`${SL[0][2].piece_name}`,d1:`${SL[0][3].piece_name}`,e1:`${SL[0][4].piece_name}`,f1:`${SL[0][5].piece_name}`,g1:`${SL[0][6].piece_name}`,h1:`${SL[0][7].piece_name}`};
         return pos;
@@ -414,7 +425,7 @@ window.onload=function(){
     let t2_list;
     let my_additional_consumed;
     let other_additional_consumed;
-    let my_col;
+    
     let clock;
     let clock2
     min= parseInt(new_room.initials.time_control.split('+')[0])
@@ -429,6 +440,7 @@ window.onload=function(){
     if(new_room.t1 && new_room.t2){
          
        if(ppath==new_room.u1){my_col=new_room.col1;t1_list=new_room.t1;t2_list=new_room.t2}else{my_col=new_room.col2;t1_list=new_room.t2;t2_list=new_room.t1}
+       console.log(t1_list,t2_list)
        if(my_col=="black"){
             for(let i=1 ;i<t1_list.length;i++){
                 let consumed=(((new Date(t1_list[i])) - (new Date(t2_list[i-1])))-increment*1000)
@@ -474,8 +486,11 @@ window.onload=function(){
         sec2=Math.floor(mili_sec2/1000)
         mili2=Math.floor((mili_sec2%1000)/100)
         clock2=numpad(min2,2)+":"+numpad(sec2,2)+"."+numpad(mili2,2)
-
-    } 
+        //if(t1_list.length-1>=0){my_prev=t1_list[t1_list.length-1]}else{my_prev=t1_list[0]}
+        //if(t2_list.length-1>=0){other_prev=t2_list[t2_list.length-1]}{other_prev=t2_list[0]}
+        if(my_col=="black"){if(t1_list.length==t2_list.length){other_prev=t2_list[t2_list.length-1]}else{other_prev=t1_list[t1_list.length-1]}
+        }else if(my_col=="white"){if(t1_list.length==t2_list.length){other_prev=t1_list[t1_list.length-1]}else{other_prev=t2_list[t2_list.length-1]}}
+    }
     let otheruser;
     let other_rating;
     let my_rating;
@@ -521,14 +536,18 @@ window.onload=function(){
         clearInterval(my_interval);other_int()
         }
     }
-
+ 
      if(new_room.u1){
          if(new_room.u1==Myusername){col=new_room.col1;other_room=new_room.u2}else{col=new_room.col2;other_room=new_room.u1}
      }else{col=new_room.color;roomname=new_room.roomname}
      let roomdata = new_room.initials 
      console.log(new_room.initials)
      if (col=="black"){flip_board()};
-  
+            // sqrs.forEach(sqr=>{
+            //     if(sqr.firstElementChild!=null){sqr.firstElementChild.remove()}
+            //     sqr.piece_name="none";
+                
+            // })
             SL[0][0].piece_name=roomdata.a1;SL[7][0].piece_name=roomdata.a1;
             SL[0][1].piece_name=roomdata.b1;SL[7][1].piece_name=roomdata.b1;
             SL[0][2].piece_name=roomdata.c1;SL[7][2].piece_name=roomdata.c1;
@@ -541,6 +560,7 @@ window.onload=function(){
             //console.log(roomdata);
                 for (let i=0;i<8;i++){for (let j=0;j<8;j++){
                         if (SL[i][j].piece_name!="none"){
+                        if(SL[i][j].firstElementChild){SL[i][j].firstElementChild.remove()}
                         SL[i][j].pImage=new Image(board.clientWidth/8-1,board.clientHeight/8-1);
                         SL[i][j].pImage.id="pieces"
                         SL[i][j].pImage.already_moved=false;
@@ -554,8 +574,8 @@ window.onload=function(){
                     }}
                 
                 imgs=document.querySelectorAll("#pieces");
-                lm_arrange(SL);
-                legal_drag();
+                arr()
+        X_FEN=position_to_FEN()
         socket.on('move_update_broadcasted',function(move_data){
             clearInterval(other_interval)
             // //st 
@@ -575,7 +595,7 @@ window.onload=function(){
             // sec=Math.floor(mili_sec/1000)  
             // mili=Math.floor((mili_sec%1000)/100)
             
-            // let clock=min+":"+sec+"."+mili  
+            // let clock=min+":"+sec+"."+mili   
              
             // if(!other_start){other_start=gamest}
             // let adjust_other_consumed_time=(new Date(move_data.othertime)) - (new Date(other_start))
@@ -588,7 +608,7 @@ window.onload=function(){
             // sec2=Math.floor(mili_sec2/1000)
             // mili2=Math.floor((mili_sec2%1000)/100)
             // let clock2=min2+":"+sec2+"."+mili2
-            let time_left
+            let time_left 
             let time_left2 
             gamest=move_data.st
             if(!my_prev){my_prev=gamest}
@@ -596,7 +616,7 @@ window.onload=function(){
 
             t1=move_data.mytime
             t2=move_data.othertime
-         
+        
             if(t1!=other_prev){my_consumed_time.push( (((new Date(t1)) - (new Date(other_prev)))-increment*1000))}else{console.log(new Date(other_prev),new Date(t1))}
             time_left=game_time-total_consumed_time(my_consumed_time)
             min=Math.floor(time_left /60000)
@@ -624,14 +644,23 @@ window.onload=function(){
 
             my_int()
             console.log('broadcasted received')
+            if(replay_mode){
+                if(last_X_FEN){
+                    FEN(last_X_FEN);
+                    console.log("x_fen fened");
+                }else{set_standard();console.log("no last_X_FEN")}
+                replay_mode=false
+            }else{console.log("no xfen")}
             PGN_move_capture(move_data.i,move_data.j,move_data.i2,move_data.j2,move_data.pro)
-            
+            last_X_FEN=position_to_FEN();
         })
         if(new_room.PGN){
             console.log(new_room.PGN) //[[..],[..] ]
+            pgnlist=new_room.PGN
             PGN_state(new_room.PGN)
+            last_X_FEN=position_to_FEN();
             
-        }
+        } 
         
     }
    
@@ -699,7 +728,7 @@ window.onload=function(){
           let k=draggedparent;
           
           //if king on b,c or d square (fischerandom) looking for rook to drop on _
-          if(k.piece_name=="king" && k.queensidecastle==true && k.firstElementChild.already_moved==false){if(1<=k.letter && k.letter<=3){
+            if(k.piece_name=="king" && k.queensidecastle==true && !k.firstElementChild.already_moved){if(1<=k.letter && k.letter<=3){
               for(let r=k.letter;r>=0;r--){if(SL[k.number][r].piece_name=="rook" && SL[k.number][r].color==k.color){
                   console.log("kinggggg")
                   
@@ -709,6 +738,7 @@ window.onload=function(){
                   SL[k.number][r].addEventListener("dragenter",dragenter);
                   SL[k.number][r].addEventListener("dragleave",dragleave);
                   SL[k.number][r].addEventListener("drop",castle_handler);
+                  break
   
                   }}
                 }
@@ -721,11 +751,11 @@ window.onload=function(){
                       SL[k.number][2].addEventListener("dragenter",dragenter);
                       SL[k.number][2].addEventListener("dragleave",dragleave);
                       SL[k.number][2].addEventListener("drop",castle_handler);
-                  }
+                }
   
-  
+            }
               
-              }else if(k.piece_name=="king" && k.kingsidecastle==true && k.firstElementChild.already_moved==false){if(5<=k.letter && k.letter<=7){
+            if(k.piece_name=="king" && k.kingsidecastle==true && !k.firstElementChild.already_moved){if(5<=k.letter && k.letter<=7){
               for(let r=k.letter;r<=7;r++){if(SL[k.number][r].piece_name=="rook" && SL[k.number][r].color==k.color){
                   
                           console.log("kinggggg")
@@ -736,10 +766,11 @@ window.onload=function(){
                           SL[k.number][r].addEventListener("dragenter",dragenter);
                           SL[k.number][r].addEventListener("dragleave",dragleave);
                           SL[k.number][r].addEventListener("drop",castle_handler);
+                          break
   
                       }}
   
-                  }
+                  } 
                   if(SL[k.number][6].piece_name=="rook"){
                       
                       SL[k.number][6].removeEventListener("drop",move_capture);
@@ -801,15 +832,20 @@ window.onload=function(){
       let j=draggedparent.letter;
       let drg=draggedparent;
       
-      
+      if(drg.color=="black"){fullmove++}
       
 
       if ((trg.number==0 || trg.number==7) && draggedparent.piece_name=="pawn"){
+          
+          halfmove=0
           let color=drg.color;
           let letter=trg.letter;
           prom(color,letter,drg,trg);
-        //   pause= [true,drg,trg];  
+        //   pause= [true,drg,trg]; 
+          
+
       }else{
+        if(trg.piece_name!="none"||drg.piece_name=="pawn"){halfmove=0}else{halfmove++}
         move_to_PGN(draggedparent,trg,pro=false)
         let move_data={i:`${i}`,j:`${j}`,i2:`${trg.number}`,j2:`${trg.letter}`,pro:false,PGN:pgnlist}
         move_socket_update(move_data);
@@ -865,7 +901,7 @@ window.onload=function(){
                       SL[lk.number][3].piece_name=lk.piece_name;console.log( SL[lk.number][3]);
                       SL[lk.number][3].color=lk.color;                    
                       SL[lk.number][3].pImage=lk.pImage;
-                      if(IDBKeyRange.letter!=3){                   
+                      if(lk.letter!=3){                   
                           lk.piece_name="none";
                           lk.color="none";
                           lk.pImage="none";
@@ -912,32 +948,33 @@ window.onload=function(){
       //sqrs.forEach(sqr=>{console.log(sqr,sqr.turn)});
       
       //en passant
-      if (trg.piece_name == "pawn"){
-          if (trg.number-SL[i][j].number>1){
-              if (ifin(i+2,r8) && ifin(j-1,r8)){
-                  if (SL[i+2][j-1].piece_name=="pawn" && SL[i+2][j-1].color!=trg.color){
-                      SL[i+2][j-1].lm.push(SL[i+1][j])
-                  }
-              }
-              if (ifin(i+2,r8) && ifin(j+1,r8)){
-                  if (SL[i+2][j+1].piece_name=="pawn" && SL[i+2][j+1].color!=trg.color){
-                      SL[i+2][j+1].lm.push(SL[i+1][j])
-                  }
-              }
-          }else if (trg.number-SL[i][j].number<-1){
-              if (ifin(i-2,r8) && ifin(j-1,r8)){
-                  if (SL[i-2][j-1].piece_name=="pawn" && SL[i-2][j-1].color!=trg.color){
-                      SL[i-2][j-1].lm.push(SL[i-1][j])
-                  }
-              }
-              if (ifin(i-2,r8) && ifin(j+1,r8)){
-                  if (SL[i-2][j+1].piece_name=="pawn" && SL[i-2][j+1].color!=trg.color){
-                      SL[i-2][j+1].lm.push(SL[i-1][j])
-                  }
-              }
-          }
-      }
-      console.log(SL);
+      en_passant(trg,i,j)
+    //   if (trg.piece_name == "pawn"){
+    //       if (trg.number-SL[i][j].number>1){
+    //           if (ifin(i+2,r8) && ifin(j-1,r8)){
+    //               if (SL[i+2][j-1].piece_name=="pawn" && SL[i+2][j-1].color!=trg.color){
+    //                   SL[i+2][j-1].lm.push(SL[i+1][j])
+    //               }
+    //           }
+    //           if (ifin(i+2,r8) && ifin(j+1,r8)){
+    //               if (SL[i+2][j+1].piece_name=="pawn" && SL[i+2][j+1].color!=trg.color){
+    //                   SL[i+2][j+1].lm.push(SL[i+1][j])
+    //               }
+    //           }
+    //       }else if (trg.number-SL[i][j].number<-1){
+    //           if (ifin(i-2,r8) && ifin(j-1,r8)){
+    //               if (SL[i-2][j-1].piece_name=="pawn" && SL[i-2][j-1].color!=trg.color){
+    //                   SL[i-2][j-1].lm.push(SL[i-1][j])
+    //               }
+    //           }
+    //           if (ifin(i-2,r8) && ifin(j+1,r8)){
+    //               if (SL[i-2][j+1].piece_name=="pawn" && SL[i-2][j+1].color!=trg.color){
+    //                   SL[i-2][j+1].lm.push(SL[i-1][j])
+    //               }
+    //           }
+    //       }
+    //   }
+      //console.log(SL)console.log(SL);
       
   
       // //let LM=draggedparent.lm;
@@ -966,10 +1003,11 @@ window.onload=function(){
        legal_drag();
        checkmate(SL);
        //console.log(SL[0][4].firstElementChild.already_moved);
-  
+       console.log(position_to_FEN())
   
       }
-      }
+      last_X_FEN=position_to_FEN();
+    }
   
   
     function move_capture2(drg,trg,SL){
@@ -1088,11 +1126,14 @@ window.onload=function(){
     }
    
     function lm_arrange(SL){
+    
+        for (let r of SL){for (let sl of r){
+            sl.lm=[];
+        }}
       for (let r of SL){for (let sl of r){
           let i=sl.number;
           let j=sl.letter;
-          sl.lm=[];
-  
+   
       // PAWN
           if(sl.piece_name=="pawn"){
               if(sl.color=="white"){
@@ -1563,10 +1604,12 @@ window.onload=function(){
   
   // KING
           if(sl.piece_name=="king"){
+              
               if(sl.color=="white"){
                   if (ifin(i+1,r8) && ifin(j,r8)){
                       if (SL[i+1][j].piece_name =="none" || SL[i+1][j].color=="black"){                    
                               sl.lm.push(SL[i+1][j]);
+                              
                       }
                   }
                   if (ifin(i+1,r8) && ifin(j+1,r8)){           
@@ -1648,13 +1691,95 @@ window.onload=function(){
   
   
               }
-  
+              
+                
           };
   
   
       }}
   
   
+     }
+     
+     function castles(SL){
+        for (sl of sqrs){
+            let i=sl.number;
+            let j=sl.letter;
+        if (sl.piece_name=="king"){
+            
+            if(!sl.firstElementChild.already_moved){
+                console.log(sl)
+                if(i==0||i==7){
+                        for(let r=0;r<j;r++){if(SL[i][r].piece_name=="rook"&&SL[i][r].color==sl.color&&!SL[i][r].firstElementChild.already_moved){
+                            let br;
+                            for(let p=r+1;p<j;p++){if(SL[i][p].piece_name!="none"){br=true;console.log("piece btw not queenside");break}}//no piece btw rook and king
+                            for(n=0;n<8;n++){for(l=0;l<8;l++){
+                                    if(SL[n][l].piece_name!="none"&&SL[n][l].color!=sl.color){
+                                        for (let m=0;m<SL[n][l].lm.length;m++){if(SL[n][l].lm[m].number==sl.number){
+                                            if(j>2){ if(SL[n][l].lm[m].letter>=2&&SL[n][l].lm[m].letter<=j){
+                                                br=true;
+                                                console.log("lm btw not queenside")
+                                                ;break
+                                                }
+                                                
+                                            }else if(j<=2){if(SL[n][l].lm[m].letter>=j&&SL[n][l].lm[m].letter<=2){
+                                                br=true;
+                                                console.log("lm btw not queenside");break
+                                                }
+                                                
+                                            }
+                                        }}
+                                    }
+                                }}
+                                if(j>2){for(let p=2;p<j;p++){if(SL[i][p].piece_name!="none"&&SL[i][p].piece_name!="rook"){br=true;console.log("piece btw not queenside");break}else if(SL[i][p].piece_name=="rook"){if(SL[i][p].color!=sl.color||SL[i][p].firstElementChild.already_moved){br=true;console.log("piece btw not queenside");break}}}}//no piece btw king and j=2
+                                if(j<=2){for(let p=j+1;p<=3;p++){if(SL[i][p].piece_name!="none"){br=true;console.log("piece btw not queenside");break}}}
+                            if(!br){
+                                sl.queensidecastle=true;
+                                console.log("queenside!!!")
+                                if(j!=1&&j!=2&&j!=3){sl.lm.push(SL[i][2])}
+                                break
+                            }else{sl.queensidecastle=false}
+                        }else{sl.queensidecastle=false}
+                        }
+
+                        for(let r=7;r>j;r--){if(SL[i][r].piece_name=="rook"&&SL[i][r].color==sl.color&&!SL[i][r].firstElementChild.already_moved){
+                            console.log(SL[i][r],SL[i][r].firstElementChild.already_moved)
+                            let br;
+                            for(let p=r-1;p>j;p--){if(SL[i][p].piece_name!="none"){br=true;console.log("piece btw not kingside");break}        
+                            }
+                            for(n=0;n<8;n++){for(l=0;l<8;l++){
+                                if(SL[n][l].piece_name!="none"&&SL[n][l].color!=sl.color){
+                                    for (let m=0;m<SL[n][l].lm.length;m++){if(SL[n][l].lm[m].number==sl.number){
+                                        if(j>6){ if(SL[n][l].lm[m].letter>=6&&SL[n][l].lm[m].letter<=j){
+                                            br=true;
+                                            console.log("lm btw not kingside");break
+                                            }
+                                            
+                                        }else if(j<=6){if(SL[n][l].lm[m].letter>=j&&SL[n][l].lm[m].letter<=6){
+                                            br=true;
+                                            console.log("lm btw not kingside");break
+                                            }
+                                            
+                                        }
+                                    }}
+                                }
+                            }}
+                            if(j>5){for(let p=5;p<j;p++){if(SL[i][p].piece_name!="none"){br=true;console.log("piece btw not kingside");break}}}
+                            if(j<=6){for(let p=j+1;p<=6;p++){if(SL[i][p].piece_name!="none"&&SL[i][p].piece_name!="rook"){br=true;console.log("piece btw not kingside");break}else if(SL[i][p].piece_name=="rook"){if(SL[i][p].color!=sl.color||SL[i][p].firstElementChild.already_moved){br=true;console.log("piece btw not kingside");break}}} }
+                            if(!br){
+                                sl.kingsidecastle=true;
+                                console.log("kingside!!!")
+                                if(j!=5&&j!=6&&j!=7){sl.lm.push(SL[i][6])}
+                                break
+                            }else{sl.kingsidecastle=false}
+                        }else{sl.kingsidecastle=false}
+                        }
+                }
+            }else{sl.queensidecastle=false;sl.kingsidecastle=false}
+        
+       }
+     }
+     
      }
   
   
@@ -1666,34 +1791,34 @@ window.onload=function(){
           }
   
       }
-      function castles2(SL){
-          let kingsidecastle=true;
-          let queensidecastle=true;
-          SL.forEach(s =>{s.forEach(sl=> {if (sl.piece_name=="king" && (sl.number==0 || sl.number==7) && sl.firstElementChild.already_moved==false){     
-              SL.forEach(r=>{r.forEach(rk=>{
-              if (rk.piece_name=="rook" && rk.number==sl.number && rk.firstElementChild.already_moved==false){
+    //   function castles2(SL){
+    //       let kingsidecastle=true;
+    //       let queensidecastle=true;
+    //       SL.forEach(s =>{s.forEach(sl=> {if (sl.piece_name=="king" && (sl.number==0 || sl.number==7) && sl.firstElementChild.already_moved==false){     
+    //           SL.forEach(r=>{r.forEach(rk=>{
+    //           if (rk.piece_name=="rook" && rk.number==sl.number && rk.firstElementChild.already_moved==false){
                   
-                      if (rk.letter>sl.letter){
-                          for(let j=sl.letter+1; j<rk.letter;j++){if (SL[rk.number][j].piece_name!="none"){kingsidecastle=false}}
-                          SL.forEach(e=>{e.forEach(en=>{if(en.piece_name!="none"&&en.color!=rk.color){en.lm.forEach(enlm=>{if(enlm.number==rk.number&&enlm.letter<rk.letter&&enlm.letter>=sl.letter){kingsidecastle=false}
-                          })
-                          }})})
-                          if(kingsidecastle){sl.lm.push(SL[sl.number][6])} 
+    //                   if (rk.letter>sl.letter){
+    //                       for(let j=sl.letter+1; j<rk.letter;j++){if (SL[rk.number][j].piece_name!="none"){kingsidecastle=false}}
+    //                       SL.forEach(e=>{e.forEach(en=>{if(en.piece_name!="none"&&en.color!=rk.color){en.lm.forEach(enlm=>{if(enlm.number==rk.number&&enlm.letter<rk.letter&&enlm.letter>=sl.letter){kingsidecastle=false}
+    //                       })
+    //                       }})})
+    //                       if(kingsidecastle){sl.lm.push(SL[sl.number][6])} 
                           
-                      }else if (rk.letter<sl.letter){
-                          for(let j=rk.letter+1; j<sl.letter;j++){if (SL[rk.number][j].piece_name!="none"){queensidecastle=false}}
-                          SL.forEach(e=>{e.forEach(en=>{if(en.piece_name!="none"&&en.color!=rk.color){en.lm.forEach(enlm=>{if(enlm.number==rk.number&&enlm.letter<=sl.letter&&enlm.letter>rk.letter){queensidecastle=false}
-                          })
-                          }})})
-                          if(queensidecastle){sl.lm.push(SL[sl.number][2])}
-                      }
+    //                   }else if (rk.letter<sl.letter){
+    //                       for(let j=rk.letter+1; j<sl.letter;j++){if (SL[rk.number][j].piece_name!="none"){queensidecastle=false}}
+    //                       SL.forEach(e=>{e.forEach(en=>{if(en.piece_name!="none"&&en.color!=rk.color){en.lm.forEach(enlm=>{if(enlm.number==rk.number&&enlm.letter<=sl.letter&&enlm.letter>rk.letter){queensidecastle=false}
+    //                       })
+    //                       }})})
+    //                       if(queensidecastle){sl.lm.push(SL[sl.number][2])}
+    //                   }
   
-              }
-              }
-              )}
-          )}})})}
+    //           }
+    //           }
+    //           )}
+    //       )}})})}
           
-      
+   
       function in_check(SL){
           let check=false;
           for (let i=0; i<8;i++){for(let j=0;j<8;j++){ if(SL[i][j].piece_name=="king"){
@@ -1725,71 +1850,71 @@ window.onload=function(){
           //sqrs.forEach(sqr=>{if (sqr.color=="black"){console.log(sqr.lm)}})
   
       }
-      function castles(SL){
-          let kingsidecastle=true;
-          let queensidecastle=true;
+    //   function castles(SL){
+    //       let kingsidecastle=true;
+    //       let queensidecastle=true;
   
-          for (let i=0; i<8; i++){for(let k=0; k<8; k++){
-              if((SL[i][k].number==0 || SL[i][k].number==7) && SL[i][k].piece_name=="king" && SL[i][k].firstElementChild.already_moved==false){
-                  for(let r=0;r<8;r++){if(SL[i][r].piece_name=="rook"&& SL[i][r].firstElementChild.already_moved==false&&SL[i][r].color==SL[i][k].color){
-                      if(k>r && k>=2){
-                         for(let p=2;p<=k;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
-                                queensidecastle=false;
-                          }}}
+    //       for (let i=0; i<8; i++){for(let k=0; k<8; k++){
+    //           if((SL[i][k].number==0 || SL[i][k].number==7) && SL[i][k].piece_name=="king" && SL[i][k].firstElementChild.already_moved==false){
+    //               for(let r=0;r<8;r++){if(SL[i][r].piece_name=="rook"&& SL[i][r].firstElementChild.already_moved==false&&SL[i][r].color==SL[i][k].color){
+    //                   if(k>r && k>=2){
+    //                      for(let p=2;p<=k;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
+    //                             queensidecastle=false;
+    //                       }}}
   
-                          if(r<2){for(let p=r;p<=3;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
-                              queensidecastle=false;
-                          }}}}
+    //                       if(r<2){for(let p=r;p<=3;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
+    //                           queensidecastle=false;
+    //                       }}}}
   
-                          if(queensidecastle==true){for(en of sqrs){if(en.piece_name!="none"&&en.color!=SL[i][k].color){
-                               for(enlm of en.lm){if(enlm.number==i && enlm.letter>=2 && enlm.letter<=k){queensidecastle=false;}}
-                          }}}
-                          if(queensidecastle){SL[i][k].lm.push(SL[i][2]);SL[i][k].queensidecastle=true}else{SL[i][k].queensidecastle=false}
-                      }else if(k>r && k<2){
-                          for(let p=k;p<=2;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
-                              queensidecastle=false;
-                          }}}
+    //                       if(queensidecastle==true){for(en of sqrs){if(en.piece_name!="none"&&en.color!=SL[i][k].color){
+    //                            for(enlm of en.lm){if(enlm.number==i && enlm.letter>=2 && enlm.letter<=k){queensidecastle=false;}}
+    //                       }}}
+    //                       if(queensidecastle){SL[i][k].lm.push(SL[i][2]);SL[i][k].queensidecastle=true}else{SL[i][k].queensidecastle=false}
+    //                   }else if(k>r && k<2){
+    //                       for(let p=k;p<=2;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
+    //                           queensidecastle=false;
+    //                       }}}
   
-                          if(r<2){for(let p=r;p<=3;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
-                              queensidecastle=false;
-                          }}}}
+    //                       if(r<2){for(let p=r;p<=3;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
+    //                           queensidecastle=false;
+    //                       }}}}
   
-                          if(queensidecastle==true){for(en of sqrs){if(en.piece_name!="none"&&en.color!=SL[i][k].color){
-                              for(enlm of en.lm){if(enlm.number==i && enlm.letter<=2 && enlm.letter>=k){queensidecastle=false;}}
-                          }}}
-                          if(queensidecastle){SL[i][k].lm.push(SL[i][2]);SL[i][k].queensidecastle=true}else{SL[i][k].queensidecastle=false} 
-                      }else if(k<r && k<=6){
-                          for(let p=k;p<=6;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
-                              kingsidecastle=false;
-                          }}}
+    //                       if(queensidecastle==true){for(en of sqrs){if(en.piece_name!="none"&&en.color!=SL[i][k].color){
+    //                           for(enlm of en.lm){if(enlm.number==i && enlm.letter<=2 && enlm.letter>=k){queensidecastle=false;}}
+    //                       }}}
+    //                       if(queensidecastle){SL[i][k].lm.push(SL[i][2]);SL[i][k].queensidecastle=true}else{SL[i][k].queensidecastle=false} 
+    //                   }else if(k<r && k<=6){
+    //                       for(let p=k;p<=6;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
+    //                           kingsidecastle=false;
+    //                       }}}
   
-                          if(r>6){for(let p=5;p<=r;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
-                              kingsidecastle=false;
-                          }}}}
+    //                       if(r>6){for(let p=5;p<=r;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
+    //                           kingsidecastle=false;
+    //                       }}}}
   
-                          if(kingsidecastle==true){for(en of sqrs){if(en.piece_name!="none"&&en.color!=SL[i][k].color){
-                              for(enlm of en.lm){if(enlm.number==i && enlm.letter<=6 && enlm.letter>=k){kingsidecastle=false;}}
-                          }}}
-                          if(kingsidecastle){SL[i][k].lm.push(SL[i][6]);SL[i][k].kingsidecastle=true}else{SL[i][k].kingsidecastle=false} 
-                      }else if(k<r && k>6){
-                          for(let p=5;p<=k;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
-                              kingsidecastle=false;
-                          }}}
-                          if(kingsidecastle==true){for(en of sqrs){if(en.piece_name!="none"&&en.color!=SL[i][k].color){
-                              for(enlm of en.lm){if(enlm.number==i && enlm.letter>=6 && enlm.letter<=k){kingsidecastle=false;}}
-                          }}}
-                          if(kingsidecastle){SL[i][k].lm.push(SL[i][6]);SL[i][k].kingsidecastle=true}else{SL[i][k].kingsidecastle=false}
-                      }
-  
-  
-                  }else if(SL[i][r].piece_name=="rook"){if(r<k){SL[i][k].queensidecastle=false}else if(r>k){SL[i][k].kingsidecastle=false}}
-                  }
-              }else if(SL[i][k].piece_name=="king"){SL[i][k].queensidecastle=false;SL[i][k].kingsidecastle=false}
+    //                       if(kingsidecastle==true){for(en of sqrs){if(en.piece_name!="none"&&en.color!=SL[i][k].color){
+    //                           for(enlm of en.lm){if(enlm.number==i && enlm.letter<=6 && enlm.letter>=k){kingsidecastle=false;}}
+    //                       }}}
+    //                       if(kingsidecastle){SL[i][k].lm.push(SL[i][6]);SL[i][k].kingsidecastle=true}else{SL[i][k].kingsidecastle=false} 
+    //                   }else if(k<r && k>6){
+    //                       for(let p=5;p<=k;p++){if(SL[i][p].piece_name!="none"){if(SL[i][p]!=SL[i][k]&&SL[i][p]!=SL[i][r]){
+    //                           kingsidecastle=false;
+    //                       }}}
+    //                       if(kingsidecastle==true){for(en of sqrs){if(en.piece_name!="none"&&en.color!=SL[i][k].color){
+    //                           for(enlm of en.lm){if(enlm.number==i && enlm.letter>=6 && enlm.letter<=k){kingsidecastle=false;}}
+    //                       }}}
+    //                       if(kingsidecastle){SL[i][k].lm.push(SL[i][6]);SL[i][k].kingsidecastle=true}else{SL[i][k].kingsidecastle=false}
+    //                   }
   
   
+    //               }else if(SL[i][r].piece_name=="rook"){if(r<k){SL[i][k].queensidecastle=false}else if(r>k){SL[i][k].kingsidecastle=false}}
+    //               }
+    //           }else if(SL[i][k].piece_name=="king"){SL[i][k].queensidecastle=false;SL[i][k].kingsidecastle=false}
   
-          }}
-      }
+  
+  
+    //       }}
+    //   }
   
       function castle_handler(e){
           e.preventDefault();
@@ -1876,6 +2001,8 @@ window.onload=function(){
               }
   
           }
+          //king.kingsidecastle=false;
+          //king.queensidecastle=false;
           lm_arrange(SL);
           in_check(SL);
           castles(SL);
@@ -2015,7 +2142,7 @@ window.onload=function(){
 
 
     function PGN_move_capture(i,j,i2,j2,pro=false,div=true){
-        console.log("pgn_move_capture")
+        //console.log("pgn_move_capture")
         sqrs.forEach(sqr=>{
             sqr.BG1=sqr.BG;
             sqr.style.background=`${sqr.BG}`;
@@ -2026,11 +2153,15 @@ window.onload=function(){
     j=Number(j);
     i2=Number(i2);
     j2=Number(j2);
-    let trg = SL[i2][j2];  
+    let trg = SL[i2][j2];
+    
     //let i=draggedparent.number;
     //let j=draggedparent.letter;
     let drg=SL[i][j];
-    
+    drg.style.background="yellow";
+    if(trg.piece_name!="none"||drg.piece_name=="pawn"){halfmove=0}else{halfmove++}
+    if(drg.color=="black"){fullmove++}
+    //console.log(SL[i2][j2],SL[i2][j2].color)
     if(div){move_to_PGN(drg,trg,pro)}
 
     //promotion
@@ -2082,7 +2213,9 @@ window.onload=function(){
         legal_drag();
         checkmate(SL); 
     }else if( drg.piece_name=="king" && drg.color==trg.color){
+        console.log(trg ,trg.color,drg,drg.color)
          PGN_castle_handler(drg,trg);
+         
     }else{
     //capture after making en passant
     if (SL[i][j].piece_name == "pawn"){
@@ -2114,11 +2247,14 @@ window.onload=function(){
     //update rook position after castles
     
     }else if( SL[i][j].piece_name =="king"){
-        console.log(SL[i][j].color,trg.color)  
+        
+        //console.log(SL[i][j].color,trg.color)  
         if (SL[i][j].number==0 || SL[i][j].number==7){
             if ((trg.letter-SL[i][j].letter)>1 || (trg.color==SL[i][j].color)){
-                console.log("castles")
+                //console.log("castles")
                 for(r of SL){for(rk of r){if (rk.piece_name=="rook"&&rk.number==SL[i][j].number&&rk.color==SL[i][j].color&&rk.letter>SL[i][j].letter){
+                    rk.firstElementChild.already_moved=true;
+                    SL[i][j].firstElementChild.already_moved=true;
                     SL[rk.number][5].appendChild(rk.firstElementChild);                
                     SL[rk.number][5].piece_name=rk.piece_name;
                     SL[rk.number][5].color=rk.color;                    
@@ -2134,12 +2270,14 @@ window.onload=function(){
                 }}
             }else if((trg.letter-SL[i][j].letter)<-1 || (trg.color==SL[i][j].color)){
                 console.log("castles")
-                for(l of SL){for (lk of l){if (lk.piece_name=="rook"&&lk.number==SL[i][j].number&&lk.color==SL[i][j].color&&lk.letter<SL[i][j].letter){
+                for(l of SL){for (lk of l){if (lk.piece_name=="rook"&&lk.already_moved==false&&lk.number==SL[i][j].number&&lk.color==SL[i][j].color&&lk.letter<SL[i][j].letter){
+                    lk.firstElementChild.already_moved=true;
+                    SL[i][j].firstElementChild.already_moved=true;
                     SL[lk.number][3].append(lk.firstElementChild);                
                     SL[lk.number][3].piece_name=lk.piece_name;console.log( SL[lk.number][3]);
                     SL[lk.number][3].color=lk.color;                    
                     SL[lk.number][3].pImage=lk.pImage;
-                    if(lk.letter!=3){                   
+                    if(lk.letter!=3){          
                         lk.piece_name="none";
                         lk.color="none";
                         lk.pImage="none";
@@ -2210,7 +2348,7 @@ window.onload=function(){
             }
         }
     }
-    console.log(SL);
+    //console.log(SL);
     
 
     // //let LM=draggedparent.lm;
@@ -2245,6 +2383,34 @@ window.onload=function(){
         
     }
 
+
+    function en_passant(trg,i,j){
+        if (trg.piece_name == "pawn"){
+            if (trg.number-SL[i][j].number>1){
+                if (ifin(i+2,r8) && ifin(j-1,r8)){
+                    if (SL[i+2][j-1].piece_name=="pawn" && SL[i+2][j-1].color!=trg.color){
+                        SL[i+2][j-1].lm.push(SL[i+1][j])
+                    }
+                }
+                if (ifin(i+2,r8) && ifin(j+1,r8)){
+                    if (SL[i+2][j+1].piece_name=="pawn" && SL[i+2][j+1].color!=trg.color){
+                        SL[i+2][j+1].lm.push(SL[i+1][j])
+                    }
+                }
+            }else if (trg.number-SL[i][j].number<-1){
+                if (ifin(i-2,r8) && ifin(j-1,r8)){
+                    if (SL[i-2][j-1].piece_name=="pawn" && SL[i-2][j-1].color!=trg.color){
+                        SL[i-2][j-1].lm.push(SL[i-1][j])
+                    }
+                }
+                if (ifin(i-2,r8) && ifin(j+1,r8)){
+                    if (SL[i-2][j+1].piece_name=="pawn" && SL[i-2][j+1].color!=trg.color){
+                        SL[i-2][j+1].lm.push(SL[i-1][j])
+                    }
+                }
+            }
+        }
+    }
 
 
     function PGN_castle_handler(drg,trg){
@@ -2427,7 +2593,7 @@ window.onload=function(){
     //     }}
                 
     //         }
-
+ 
 
     //     }
 
@@ -2547,10 +2713,296 @@ window.onload=function(){
         SL[i][j].pImage.style.top="0%";
         SL[i][j].pImage.style.left="0%";
                 
-        }   
+        }else{SL[i][j].color="none"}   
     }}
-    lm_arrange(SL);
+    arr();
    }
+
+
+function FEN(text){
+    
+    let fen_letters=['p','r','n','b','q','k','P','R','N','B','Q','K']
+    let fen_pieces=['pawn','rook','knight','bishop','queen','king']
+    let sp=text.split('/')
+    sp[sp.length-1]=sp[sp.length-1].split(" ")[0]
+    let i=0;
+    let j=0;
+    if(sp.length==8){
+        for (sqr of sqrs){
+            sqr.piece_name="none";
+            sqr.color="none";
+            if (sqr.firstElementChild!=null){sqr.firstElementChild.remove()}   
+        }
+        for(let s=0;s<8;s++){ //"rnbqkbnr", "pppppppp", "8", "8", "4P3", "8", "PPPP1PPP", "RNBQKBNR b KQkq e3 0 1"]
+            i=7-s;
+            j=0;
+            for(let r=0;r<sp[s].length;r++){
+                if(ifin(sp[s][r],numbers)){
+                    let blanks=parseInt(sp[s][r])                  
+                    for(let bla=j;bla<j+blanks;bla++){
+                        if (SL[i][bla].firstElementChild!=null){SL[i][bla].firstElementChild.remove()}
+                        SL[i][bla].piece_name="none";
+                        SL[i][bla].color="none";
+
+
+                    }
+                    j=j+blanks
+                }else if(ifin(sp[s][r],fen_letters)){
+                    if(fen_letters.indexOf(sp[s][r])<=5){SL[i][j].color="black"
+                    }else{SL[i][j].color="white"}
+                    let f="g"
+                    SL[i][j].piece_name=fen_pieces[fen_letters.indexOf(sp[s][r].toLowerCase())]
+                    if (SL[i][j].firstElementChild!=null){SL[i][j].firstElementChild.remove()}
+                    SL[i][j].pImage=new Image(board.clientWidth/8-1,board.clientHeight/8-1);
+                    SL[i][j].pImage.id="pieces"
+                    SL[i][j].pImage.already_moved=false;
+                    SL[i][j].pImage.src=`staticassets/board/images/sprites/${SL[i][j].color+SL[i][j].piece_name}.png`;
+                    SL[i][j].appendChild(SL[i][j].pImage);
+                    SL[i][j].pImage.style.position="absolute";
+                    SL[i][j].pImage.style.top="0%";
+                    SL[i][j].pImage.style.left="0%";
+                    j++  
+      
+                }
+            }
+        }
+        sp=text.split('/')
+        if(sp[sp.length-1].split(" ")[1]=="b"){
+            sqrs.forEach(sqr=>{if(sqr.color=="black"){sqr.turn=true}else{sqr.turn=false}})
+
+        }else{sqrs.forEach(sqr=>{if(sqr.color=="white"){sqr.turn=true}else{sqr.turn=false}})}
+
+        if(sp[sp.length-1].split(" ")[2]&&sp[sp.length-1].split(" ")[2]!="-"){
+            let castle=sp[sp.length-1].split(" ")[2]
+            for(let cas=0;cas<castle.length;cas++){
+                if(ifin(castle[cas].toLowerCase(),letters)&&!ifin(castle[cas],letters)){//ABCDEFGH
+                    for(let ki=0;ki<8;ki++ ){
+                        if(SL[0][ki].piece_name=="king"&&SL[0][ki].color=="white"){
+                            for(let ro=0;ro<7;ro++){if(SL[0][ro].id==castle[cas].toLowerCase()+"1"&&SL[0][ro].piece_name=="rook"){//g1
+                            SL[0][ro].firstElementChild.already_moved=false;
+                            SL[0][ki].firstElementChild.already_moved=false;
+                            break
+                            }}
+                        }
+                    }
+                }else if(ifin(castle[cas],letters)){//abcdefgh
+                    for(let ki=0;ki<8;ki++ ){
+                        if(SL[7][ki].piece_name=="king"&&SL[7][ki].color=="black"){
+                            for(let ro=0;ro<7;ro++){if(SL[7][ro].id==castle[cas].toLowerCase()+"1"&&SL[7][ro].piece_name=="rook"){//g1
+                            SL[7][ro].firstElementChild.already_moved=false;
+                            SL[7][ki].firstElementChild.already_moved=false;
+                            break
+                            }}
+                        }
+                    }
+                }else if(castle[cas]=="K"){
+                    for(let ki=0;ki<8;ki++ ){
+                        if(SL[0][ki].piece_name=="king"&&SL[0][ki].color=="white"){
+                            for(let ro=7;ro>ki;ro--){if(SL[0][ro].color=="white"&&SL[0][ro].piece_name=="rook"){//g1
+                            SL[0][ro].firstElementChild.already_moved=false;
+                            SL[0][ki].firstElementChild.already_moved=false;
+                            break
+                            }}
+                        }
+                    }
+
+                }else if(castle[cas]=="Q"){
+                    for(let ki=0;ki<8;ki++ ){
+                        if(SL[0][ki].piece_name=="king"&&SL[0][ki].color=="white"){
+                            for(let ro=0;ro<ki;ro++){if(SL[0][ro].color=="white"&&SL[0][ro].piece_name=="rook"){//g1
+                            SL[0][ro].firstElementChild.already_moved=false;
+                            SL[0][ki].firstElementChild.already_moved=false;
+                            break
+                            }}
+                        }
+                    }
+
+                }else if(castle[cas]=="k"){
+                    for(let ki=0;ki<8;ki++ ){
+                        if(SL[7][ki].piece_name=="king"&&SL[7][ki].color=="white"){
+                            for(let ro=7;ro>ki;ro--){if(SL[7][ro].color=="white"&&SL[7][ro].piece_name=="rook"){//g1
+                            SL[7][ro].firstElementChild.already_moved=false;
+                            SL[7][ki].firstElementChild.already_moved=false;
+                            break
+                            }}
+                        }
+                    }
+                    
+
+                }else if(castle[cas]=="q"){
+                    for(let ki=0;ki<8;ki++ ){
+                        if(SL[7][ki].piece_name=="king"&&SL[7][ki].color=="white"){
+                            for(let ro=0;ro<ki;ro++){if(SL[7][ro].color=="white"&&SL[7][ro].piece_name=="rook"){//g1
+                            SL[7][ro].firstElementChild.already_moved=false;
+                            SL[7][ki].firstElementChild.already_moved=false;
+                            break
+                            }}
+                        }
+                    }
+
+                }
+            }
+        }
+        
+        if(sp[sp.length-1].split(" ")[3]&&sp[sp.length-1].split(" ")[3]!="-"&&sp[sp.length-1].split(" ")[3]!="--"){
+             let enpass=sp[sp.length-1].split(" ")[3];
+             sqrs.forEach(sqr=>{if(sqr.id==enpass){
+                lm_arrange(SL);
+                in_check(SL);
+                castles(SL);
+                let trg;let i1;let j1;
+                if(sqr.number==5){trg=SL[sqr.number-1][sqr.letter];i1=sqr.number+1;j1=sqr.letter
+                }else{trg=SL[sqr.number+1][sqr.letter];i1=sqr.number-1;j1=sqr.letter}
+                if(trg&&i1&&j1){en_passant(trg,i1,j1)}
+                lm_remove();
+                legal_drag();
+                checkmate(SL);
+             }else{arr()}})  
+        }else{
+            arr() 
+        }
+
+    }
+
+}
+
+//FEN("rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR w Gkq - 4 11")
+
+function arr(){
+    lm_arrange(SL);
+    in_check(SL);
+    castles(SL);
+    lm_remove();
+    legal_drag();
+    checkmate(SL);
+}
+
+function position_to_FEN(){
+    let  FEN=[];
+    let fen_string=""
+    for(let i=7;i>=0;i--){
+        let el="";
+        let bla=0
+        for(let j=0;j<8;j++){
+
+            
+            if(SL[i][j].piece_name!="none"){
+                if(bla){el=el+`${bla}`;bla=0}
+                if(SL[i][j].color=="white"){
+                if(SL[i][j].piece_name=="knight"){el=el+"N"
+                }else{el=el+`${SL[i][j].piece_name[0].toUpperCase()}`}
+                }else{
+                if(SL[i][j].piece_name=="knight"){el=el+"n"
+                }else{el=el+`${SL[i][j].piece_name[0].toLowerCase()}`} 
+                }
+            }else{bla=bla+1}
+            if(j==7&&i!=0){if(bla){el=el+`${bla}`+"/";FEN.push(el)}else{ el=el+"/";FEN.push(el)
+            console.log(el)}
+            }else if(j==7&&i==0){
+                console.log(i,j)
+                let imgs=document.querySelectorAll("#pieces");
+                if(imgs[0].parentNode.color=="white"&&imgs[0].parentNode.turn){
+                    el=el+" "+"w"
+                }else if(imgs[0].parentNode.color=="black"&&imgs[0].parentNode.turn){
+                    el=el+" "+"b"
+                }else if(imgs[0].parentNode.color=="white"){
+                    el=el+" "+"b"
+                }else if(imgs[0].parentNode.color=="black"){
+                    el=el+" "+"w"
+                }
+                let castles=false;
+                for (let j=0;j<8;j++){if(SL[0][j].piece_name=="king"&&SL[0][j].color=="white"&&SL[0][j].firstElementChild.already_moved==false){
+                    for (let r=7;r>j;r--){if(SL[0][r].piece_name=="rook"&&SL[0][r].color=="white"){
+                        if(SL[0][r].firstElementChild.already_moved==false){
+                            el=el+" "+"K"
+                            castles=true
+                            break
+                        }else{for(let r2=r-1;r2>j;r2--){
+                            if(SL[0][r2].piece_name=="rook"&&SL[0][r2].color=="white"&&SL[0][r2].firstElementChild.already_moved==false){
+                                if(!castles){el=el+" "+`${SL[0][r2].letter.toUpperCase()}`;castles=true
+                                }else{el=el+`${SL[0][r2].letter.toUpperCase()}`}
+                                castles=true
+                                break
+                            }
+                        }}
+                    }}
+                }}
+                for (let j=0;j<8;j++){if(SL[0][j].piece_name=="king"&&SL[0][j].color=="white"&&SL[0][j].firstElementChild.already_moved==false){
+                    for (let r=0;r<j;r++){if(SL[0][r].piece_name=="rook"&&SL[0][r].color=="white"){
+                        if(SL[0][r].firstElementChild.already_moved==false){
+                            if(!castles){el=el+" "+"Q"
+                            }else{el=el+"Q"}
+                            castles=true
+                            break
+                        }else{for(let r2=r+1;r2<j;r2++){
+                            if(SL[0][r2].piece_name=="rook"&&SL[0][r2].color=="white"&&SL[0][r2].firstElementChild.already_moved==false){
+                                if(!castles){el=el+" "+`${SL[0][r2].letter.toUpperCase()}`
+                                }else{el=el+`${SL[0][r2].letter.toUpperCase()}`}
+                                castles=true
+                                break
+                            }
+                        }}
+                    }}
+                }}
+                for (let j=0;j<8;j++){if(SL[7][j].piece_name=="king"&&SL[7][j].color=="black"&&SL[7][j].firstElementChild.already_moved==false){
+                    for (let r=7;r>j;r--){if(SL[7][r].piece_name=="rook"&&SL[7][r].color=="black"){
+                        if(SL[7][r].firstElementChild.already_moved==false){
+                            if(!castles){el=el+" "+"k"
+                            }else{el=el+"k"}
+                            castles=true
+                            break
+                        }else{for(let r2=r-1;r2>j;r2--){
+                            if(SL[7][r2].piece_name=="rook"&&SL[7][r2].color=="black"&&SL[7][r2].firstElementChild.already_moved){
+                                if(!castles){el=el+" "+`${SL[7][r2].letter.toLowerCase()}`
+                                }else{el=el+`${SL[7][r2].letter.toLowerCase()}`}
+                                castles=true
+                                break
+                            }
+                        }}
+                    }}
+                }}
+                for (let j=0;j<8;j++){if(SL[7][j].piece_name=="king"&&SL[7][j].color=="black"&&SL[7][j].firstElementChild.already_moved==false){
+                    for (let r=0;r<j;r++){if(SL[7][r].piece_name=="rook"&&SL[7][r].color=="black"){
+                        if(SL[7][r].firstElementChild.already_moved==false){
+                            if(!castles){el=el+" "+"q"
+                            }else{el=el+"q"}
+                            castles=true
+                            break
+                        }else{for(let r2=r+1;r2<j;r2++){
+                            if(SL[7][r2].piece_name=="rook"&&SL[7][r2].color=="black"&&SL[7][r2].firstElementChild.already_moved==false){
+                                if(!castles){el=el+" "+`${SL[7][r2].letter.toLowerCase()}`
+                                }else{el=el+`${SL[7][r2].letter.toLowerCase()}`}
+                                castles=true
+                                break
+                            }
+                        }}
+                    }}
+                }}
+                if(!castles){el=el+" "+"-"+" "}else{el=el+" "}
+                let en_pass=false
+                sqrs.forEach(sqr=>{
+                    if(sqr.turn&&sqr.piece_name=="pawn"){
+                        for(lm of sqr.lm){if(lm.piece_name=="none"&&lm.color=="none"&&lm.letter!=sqr.letter){
+                            el=el+lm.id
+                            en_pass=true
+                        }}
+                    }
+                })
+                if(!en_pass){el=el+"-"+" "}else{el=el+" "}
+                el=el+halfmove+" "+fullmove
+                FEN.push(el);
+                
+                for(f of FEN){fen_string=fen_string+f}
+                
+
+            }
+        }
+    }
+    return fen_string;
+
+}
+
+
 
   PGNbtn.addEventListener("click",function(e){
       console.log("pgnbtn");
@@ -2558,13 +3010,14 @@ window.onload=function(){
       pgnlist=[];
 
     if(PGNinput.value){
-        
+      replay_mode=true;
       set_standard();
       obj={buf:`${PGNinput.value}`}
       text=obj.buf;
       text=cut(text);
       pl=PGN_list(text);
       console.log(pl);
+
       
     //   cc=`<div id="replaylist">
     //     </div>`
@@ -2574,69 +3027,78 @@ window.onload=function(){
         
     //     replay_area.append(cctemplate);
     //     replaylist=document.getElementById('replaylist');
-      let licc='';
-      for (let i=0;i<pl.length; i++){
+      create_div_PGN(pl)
+    //   let licc='';
+    //   for (let i=0;i<pl.length; i++){
+        
+    //     cc=`<div class="replaylist">               
+    //                 <div class="replay_move" id="${i+"."+pl[i][0]}">${pl[i][0]}</div>
+    //                 <%if ("${pl[i][1]}"!="undefined") { %>
+    //                     <div class="replay_move" id="${i+"."+pl[i][1]}">${pl[i][1]}</div>
+    //                 <% } %>            
+    //         </div>`
+    //     licc=licc+cc;
+    //    }
 
-        cc=`<div class="replaylist">               
-                    <div class="replay_move" id="${pl[i][0]}">${pl[i][0]}</div>
-                    <%if ("${pl[i][1]}"!="undefined") { %>
-                        <div class="replay_move" id="${pl[i][1]}">${pl[i][1]}</div>
-                    <% } %>            
-            </div>`
-        licc=licc+cc;
-       }
+    //     var cctemplate = ejs.render(licc);
+    //     replay_area.innerHTML=cctemplate;
+    //     let replay_move=document.querySelectorAll('.replay_move');
 
-        var cctemplate = ejs.render(licc);
-        replay_area.innerHTML=cctemplate;
-
-        for (let i=0;i<pl.length; i++){
-          if (pl[i][0]){
-               w=document.getElementById(`${pl[i][0]}`);
-               w.addEventListener("click",function(){
-                   set_standard();
-                   for (let k=0;k<=i;k++){
-                       if(k==i){
-                          if(ifin(pl[k][0][0],numbs)){
-                                whi=white(pl[k][0],"white");
-                                PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
-                            }else{bla=black(pl[k][0],"black");
-                            PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);}
-                       }else{
-                            if(ifin(pl[k][0][0],numbs)){
-                                whi=white(pl[k][0],"white");
-                                PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
-                            }else{bla=black(pl[k][0],"black");
-                            PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);}
-                            if(pl[k][1]){
-                                bla=black(pl[k][1],"black");
-                                PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
-                            }
-                       }
+    //     for (let i=0;i<pl.length; i++){
+    //       if (pl[i][0]){
+              
+    //            w=document.getElementById(`${i+"."+pl[i][0]}`);
+    //            w.addEventListener("click",function(e){
+    //             //console.log(sqrs)
+    //                for(el of replay_move){el.style.backgroundColor="white"}
+    //                e.target.style.backgroundColor="tan"
+    //                //w.style.backgroundColor="red"
+    //                if(X_FEN){FEN(X_FEN)}else{set_standard()}
+    //                for (let k=0;k<=i;k++){
+    //                    if(k==i){
+    //                       if(ifin(pl[k][0][0],numbs)){
+    //                             whi=white(pl[k][0],"white");
+    //                             PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
+    //                         }else{bla=black(pl[k][0],"black");
+    //                             PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);}
+    //                    }else{
+    //                         if(ifin(pl[k][0][0],numbs)){
+    //                             whi=white(pl[k][0],"white");
+    //                             PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
+    //                         }else{bla=black(pl[k][0],"black");
+    //                             PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);}
+    //                         if(pl[k][1]){
+    //                             bla=black(pl[k][1],"black");
+    //                             PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
+    //                         }
+    //                    }
                         
-                   }                  
-                })
+    //                }                  
+    //             })
                
-            }
-          if (pl[i][1]){
-              console.log(typeof(pl[i][1]))
-                B=document.getElementById(`${pl[i][1]}`);
-                B.addEventListener("click",function(){
-                    set_standard();
-                    for (let k=0;k<=i;k++){
-                            if(ifin(pl[k][0][0],numbs)){
-                                whi=white(pl[k][0],"white");
-                                PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
-                            }else{bla=black(pl[k][0],"black");
-                            PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
-                            }
-                         if(pl[k][1]){
-                            bla=black(pl[k][1],"black");
-                            PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
-                        }
-                    } 
-                })
-            }
-        }
+    //         }
+    //       if (pl[i][1]){
+    //           console.log(typeof(pl[i][1]))
+    //             B=document.getElementById(`${i+"."+pl[i][1]}`);
+    //             B.addEventListener("click",function(e){
+    //                 for(el of replay_move){el.style.backgroundColor="white"}
+    //                 e.target.style.backgroundColor="tan"
+    //                 if(X_FEN){FEN(X_FEN)}else{set_standard()}
+    //                 for (let k=0;k<=i;k++){
+    //                         if(ifin(pl[k][0][0],numbs)){
+    //                             whi=white(pl[k][0],"white");
+    //                             PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
+    //                         }else{bla=black(pl[k][0],"black");
+    //                         PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
+    //                         }
+    //                      if(pl[k][1]){
+    //                         bla=black(pl[k][1],"black");
+    //                         PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
+    //                     }
+    //                 } 
+    //             })
+    //         }
+        // }
       
       //console.log(p);
       // let o="";
@@ -2751,16 +3213,20 @@ window.onload=function(){
     }
         if(pgnlist.length==0 && drg.color=="white"){
             pgnlist.push([`1.${Mov}`])
-            create_div_PGN(`1.${Mov}`)
+            create_div_PGN(pgnlist)
+            //create_div_PGN(`1.${Mov}`)
         }else if(pgnlist.length==0 && drg.color=="black"){
             pgnlist.push([`${Mov}`])
-            create_div_PGN(`${Mov}`)
+            create_div_PGN(pgnlist)
+            //create_div_PGN(`${Mov}`)
         }else if(drg.color=="white"){
             pgnlist.push([`${pgnlist.length+1}`+'.'+ Mov])
-            create_div_PGN(`${pgnlist.length}`+'.'+ Mov)
+            create_div_PGN(pgnlist)
+            //create_div_PGN(`${pgnlist.length}`+'.'+ Mov)
         }else if(drg.color=="black"){
             pgnlist[pgnlist.length-1].push(Mov)
-            create_div_PGN(`${Mov}`)
+            create_div_PGN(pgnlist)
+            //create_div_PGN(`${Mov}`)
         }
         // console.log(pgnlist);
   }
@@ -2774,14 +3240,29 @@ window.onload=function(){
   
   
   function cut(pos){
+    X_FEN=undefined;  
     i=0;
     text=""
     while(i<pos.length){
       if(pos[i]=="["){
+          let f=skip(pos,i+1)
+          if(pos[f].toLowerCase()=="f"&&pos[f+1].toLowerCase()=="e"&&pos[f+2].toLowerCase()=="n"&&pos[f+3]==" "){
+            for(let k=f+4;k<pos.length;k++){
+                if(pos[k]==']'){
+                    let n=k;
+                    let xfen =function(){let fen="";let g=f+4;while(g<n){fen=fen+pos[g];g++};return fen}
+                    X_FEN=xfen()
+                    FEN(X_FEN)
+                    console.log(X_FEN[0],X_FEN)
+                    break
+                }
+            }
+          }
+
         for(let k=i;k<pos.length;k++){
           if(pos[k]=="]"){
             i=k+1;
-            
+            break
           }
         }
         continue; 
@@ -2790,7 +3271,7 @@ window.onload=function(){
         for(let k=i;k<pos.length;k++){
           if(pos[k]=="}"){
             i=k+1;
-            
+            break
           }
         } 
         continue;
@@ -2805,6 +3286,7 @@ window.onload=function(){
   
   
   function PGN_list(pos){
+      pos=pos.replace(/(\r\n|\n|\r)/gm," ")
       console.log(pos);
     let z=0;  
     let i=0;
@@ -2956,7 +3438,7 @@ function white(buf,color){
                                 }
                         }else if(ifin(buf[i+1],numbs)){//R3
                             for (let j=0;j<Capital.length;j++){if(Capital[j]==buf[i]){pn.piece_name=pieces[j]}}
-                            pn.number=buf[i+1];
+                            pn.number=parseInt(buf[i+1])-1;
                                 if (buf[i+2]=="x"){//R3x
                                     trgid=buf[i+3]+buf[i+4]; //R3xe3
                                     
@@ -2994,12 +3476,12 @@ function white(buf,color){
                         
                             if(buf[i+2]=="x"){//e4x
                                 if(buf[i+5]=="="){//e7xd8=
-                                    pn.number=buf[i+1];
+                                    pn.number=parseInt(buf[i+1])-1;
                                     trgid=buf[i+3]+buf[i+4];
                                     pn.promotion=buf[i+6];
                                     break;
                                 }else{
-                                pn.number=buf[i+1];
+                                pn.number=parseInt(buf[i+1])-1;
                                 trgid=buf[i+3]+buf[i+4]
                                 break;
                                 }
@@ -3011,6 +3493,44 @@ function white(buf,color){
 
                             }else{trgid=buf[i]+buf[i+1];break;}
                         }             
+                    }else if(buf[i]=="O"){//castles
+                        pn.piece_name="king"
+                       if(buf[i+3]=="-"&&buf[i+4]=="O"){//O-O-
+                        //console.log("white long her")
+                         
+                        for(let k=0;k<8;k++){if(SL[0][k].piece_name=="king"){
+                            for(let r=k;r>=0;r--){if(SL[0][r].piece_name=="rook"){
+                                pn.id=`${letters[k]}`+"1"
+                               //pn.number=0;
+                              // pn.letter=`${letters[k]}`
+                               if(k==1||k==2||k==3){
+                                   trgid=`${letters[r]}`+"1";
+                                   break
+                               }else{
+                                   trgid="c1"
+                                   break
+                               }
+                            }}
+                        }}
+                        i=i+5
+                       }else if(buf[i+2]=="O"&&!buf[i+3]){//O-O
+                        //console.log("white short her")
+                        for(let k=0;k<8;k++){if(SL[0][k].piece_name=="king"){
+                            for(let r=k;r<8;r++){if(SL[0][r].piece_name=="rook"){
+                                pn.id=`${letters[k]}`+"1"
+                                //pn.number=0;
+                                //pn.letter=`${letters[k]}`
+                                if(k==5||k==6||k==7){
+                                    trgid=`${letters[r]}`+"1"
+                                    break
+                                }else{
+                                    trgid="g1"
+                                    break
+                                }
+                            }}
+                        }}
+                       }
+                       i=i+3
                     }
                 }
             }
@@ -3028,7 +3548,7 @@ function white(buf,color){
 }
 
 
-
+ 
 function black(buf,color){
     let i=-1;
     let pn={color:color}; // color,letter,piece_name,number,promotion
@@ -3060,7 +3580,7 @@ function black(buf,color){
                 }
         }else if(ifin(buf[i+1],numbs)){//R3
             for (let j=0;j<Capital.length;j++){if(Capital[j]==buf[i]){pn.piece_name=pieces[j]}}
-            pn.number=buf[i+1];
+            pn.number=parseInt(buf[i+1])-1;
                 if (buf[i+2]=="x"){//R3x
                     trgid=buf[i+3]+buf[i+4]; //R3xe3
                     
@@ -3098,11 +3618,11 @@ function black(buf,color){
         
             if(buf[i+2]=="x"){//e4x
                 if(buf[i+5]=="="){//e7xd8=
-                    pn.number=buf[i+1];
+                    pn.number=parseInt(buf[i+1])-1;
                     trgid=buf[i+3]+buf[i+4];
 
                 }else{
-                pn.number=buf[i+1];
+                pn.number=parseInt(buf[i+1])-1;
                 trgid=buf[i+3]+buf[i+4]
                 break;
                 }
@@ -3113,8 +3633,46 @@ function black(buf,color){
                 break;
 
             }else{trgid=buf[i]+buf[i+1];break;}
-        }             
-    }
+        }          
+    }else if(buf[i]=="O"){//castles
+        pn.piece_name="king"
+        if(buf[i+1]=="-"&&buf[i+2]=="O"&&buf[i+3]=="-"&&buf[i+4]=="O"){//O-O-
+            console.log(i,buf,buf[i+2],buf[i+3]+" "+buf[i+4]) 
+            //console.log("black long here",buf[i+3])
+         for(let k=0;k<8;k++){if(SL[7][k].piece_name=="king"&&SL[7][k].color=="black"){
+             for(let r=k;r>=0;r--){if(SL[7][r].piece_name=="rook"&&SL[7][r].already_moved==false){
+                pn.id=`${letters[k]}`+"8"
+                //pn.number=7;
+                //pn.letter=`${letters[k]}`
+                if(k==1||k==2||k==3){
+                    trgid=`${letters[r]}`+"8";
+                    break
+                }else{
+                    trgid="c8"
+                    break
+                }
+             }}
+         }}
+         i=i+5
+        }else if(buf[i+1]=="-"&&buf[i+2]=="O"&&!buf[i+3]){//O-O
+            console.log(i,buf,buf[i+1],buf[i+2])
+         for(let k=0;k<8;k++){if(SL[7][k].piece_name=="king"){
+             for(let r=k;r<8;r++){if(SL[7][r].piece_name=="rook"){
+                 pn.id=`${letters[k]}`+"8"
+                 //pn.number=7;
+                 //pn.letter=`${letters[k]}`
+                 if(k==5||k==6||k==7){
+                     trgid=`${letters[r]}`+"8"
+                     break
+                 }else{
+                     trgid="g8"
+                     break
+                 }
+             }}
+         }}
+        }
+        i=i+3
+     }   
     if(i>=buf.length || buf[i]==undefined){
         break;
     }
@@ -3137,9 +3695,10 @@ function SLsquar(pn,trgid){ //pn: color,letter,piece_name,number,promotion
   let pro=false;
   //for (let i=0;i<Capital.length;i++){if(Capital[i]==pn.piece_name){piece_name=pieces[i]}}
   for(sqr of sqrs){if(sqr.id==trgid){trg=sqr}}
-  console.log(trg)
- 
-  if (pn.letter){
+  //console.log(trg)
+  if(pn.id){
+      for(sqr of sqrs){if(sqr.id==pn.id){drg=sqr}} 
+  }else if (pn.letter){
      for (sqr of sqrs){if(sqr.color==pn.color && sqr.piece_name==pn.piece_name && sqr.id[0]==pn.letter && ifin(trg,sqr.lm)){
          drg=sqr
      }}
@@ -3161,7 +3720,7 @@ function SLsquar(pn,trgid){ //pn: color,letter,piece_name,number,promotion
   
 
 
-function create_div_PGN(pgnMov){
+function create_div_PGN0(pgnMov){
         
         if (ifin(pgnMov[0],numbs)){
             let rpl = document.createElement("div");
@@ -3210,79 +3769,156 @@ function create_div_PGN(pgnMov){
                           }else{bla=black(pl[i][0],"black");
                           PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);}            
         }
-        if (pl[i][1]){           
+        if (pl[i][1]){    
+                          console.log(pl[i][1])       
                           bla=black(pl[i][1],"black");
                           PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
                       
         } 
     }
+    create_div_PGN(pl)
+    // let licc='';
+    // for (let i=0;i<pl.length; i++){
 
-    let licc='';
-    for (let i=0;i<pl.length; i++){
+    //   cc=`<div class="replaylist">               
+    //               <div class="replay_move" id="${pl[i][0]}">${pl[i][0]}</div>
+    //               <%if ("${pl[i][1]}"!="undefined") { %>
+    //                   <div class="replay_move" id="${pl[i][1]}">${pl[i][1]}</div>
+    //               <% } %>            
+    //       </div>`
+    //   licc=licc+cc;
+    //  }
 
-      cc=`<div class="replaylist">               
-                  <div class="replay_move" id="${pl[i][0]}">${pl[i][0]}</div>
-                  <%if ("${pl[i][1]}"!="undefined") { %>
-                      <div class="replay_move" id="${pl[i][1]}">${pl[i][1]}</div>
-                  <% } %>            
-          </div>`
-      licc=licc+cc;
-     }
-
-      var cctemplate = ejs.render(licc);
-      replay_area.innerHTML=cctemplate;
-
-      for (let i=0;i<pl.length; i++){
-        if (pl[i][0]){
-             w=document.getElementById(`${pl[i][0]}`);
-             w.addEventListener("click",function(){
-                 set_standard();
-                 for (let k=0;k<=i;k++){
-                     if(k==i){
-                        if(ifin(pl[k][0][0],numbs)){
-                              whi=white(pl[k][0],"white");
-                              PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
-                          }else{bla=black(pl[k][0],"black");
-                          PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);}
-                     }else{
-                          if(ifin(pl[k][0][0],numbs)){
-                              whi=white(pl[k][0],"white");
-                              PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
-                          }else{bla=black(pl[k][0],"black");
-                          PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);}
-                          if(pl[k][1]){
-                              bla=black(pl[k][1],"black");
-                              PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
-                          }
-                     }
+    //   var cctemplate = ejs.render(licc);
+    //   replay_area.innerHTML=cctemplate;
+  
+    //   for (let i=0;i<pl.length; i++){
+    //     if (pl[i][0]){
+    //          w=document.getElementById(`${pl[i][0]}`);
+    //          w.addEventListener("click",function(){
+    //             replay_mode=true;
+    //             if(X_FEN){FEN(X_FEN)}else{set_standard()}
+    //              for (let k=0;k<=i;k++){
+    //                  if(k==i){
+    //                     if(ifin(pl[k][0][0],numbs)){
+    //                           whi=white(pl[k][0],"white");
+    //                           PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
+    //                       }else{bla=black(pl[k][0],"black");
+    //                       PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);}
+    //                  }else{
+    //                       if(ifin(pl[k][0][0],numbs)){
+    //                           whi=white(pl[k][0],"white");
+    //                           PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
+    //                       }else{bla=black(pl[k][0],"black");
+    //                       PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);}
+    //                       if(pl[k][1]){
+    //                           bla=black(pl[k][1],"black");
+    //                           PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
+    //                       }
+    //                  }
                       
-                 }                  
-              })
+    //              }                  
+    //           })
              
-          }
-        if (pl[i][1]){
-            console.log(typeof(pl[i][1]))
-              B=document.getElementById(`${pl[i][1]}`);
-              B.addEventListener("click",function(){
-                  set_standard();
-                  for (let k=0;k<=i;k++){
-                          if(ifin(pl[k][0][0],numbs)){
-                              whi=white(pl[k][0],"white");
-                              PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
-                          }else{bla=black(pl[k][0],"black");
-                          PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
-                          }
-                       if(pl[k][1]){
-                          bla=black(pl[k][1],"black");
-                          PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
-                      }
-                  } 
-              })
-          }
-      }
+    //       } 
+    //     if (pl[i][1]){
+    //         console.log(typeof(pl[i][1]))
+    //           B=document.getElementById(`${pl[i][1]}`);
+    //           B.addEventListener("click",function(){
+    //             replay_mode=true;
+    //             if(X_FEN){FEN(X_FEN)}else{set_standard()}
+    //               for (let k=0;k<=i;k++){
+    //                       if(ifin(pl[k][0][0],numbs)){
+    //                           whi=white(pl[k][0],"white");
+    //                           PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
+    //                       }else{bla=black(pl[k][0],"black");
+    //                       PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
+    //                       }
+    //                    if(pl[k][1]){
+    //                       bla=black(pl[k][1],"black");
+    //                       PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
+    //                   }
+    //               } 
+    //           })
+    //       }
+    //   }
 }
 
+function create_div_PGN(pl){
+    let licc='';
+      for (let i=0;i<pl.length; i++){
+        
+        cc=`<div class="replaylist">               
+                    <div class="replay_move" id="${i+"."+pl[i][0]}">${pl[i][0]}</div>
+                    <%if ("${pl[i][1]}"!="undefined") { %>
+                        <div class="replay_move" id="${i+"."+pl[i][1]}">${pl[i][1]}</div>
+                    <% } %>            
+            </div>`
+        licc=licc+cc;
+       }
 
+        var cctemplate = ejs.render(licc);
+        replay_area.innerHTML=cctemplate;
+        let replay_move=document.querySelectorAll('.replay_move');
+
+        for (let i=0;i<pl.length; i++){
+          if (pl[i][0]){
+              
+               w=document.getElementById(`${i+"."+pl[i][0]}`);
+               w.addEventListener("click",function(e){
+                replay_mode=true;
+                //console.log(sqrs)
+                   for(el of replay_move){el.style.backgroundColor="white"}
+                   e.target.style.backgroundColor="tan"
+                   //w.style.backgroundColor="red"
+                   if(X_FEN){FEN(X_FEN)}else{set_standard()}
+                   for (let k=0;k<=i;k++){
+                       if(k==i){
+                          if(ifin(pl[k][0][0],numbs)){
+                                whi=white(pl[k][0],"white");
+                                PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
+                            }else{bla=black(pl[k][0],"black");
+                                PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);}
+                       }else{
+                            if(ifin(pl[k][0][0],numbs)){
+                                whi=white(pl[k][0],"white");
+                                PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
+                            }else{bla=black(pl[k][0],"black");
+                                PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);}
+                            if(pl[k][1]){
+                                bla=black(pl[k][1],"black");
+                                PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
+                            }
+                       }
+                        
+                   }                  
+                })
+               
+            }
+          if (pl[i][1]){
+              console.log(typeof(pl[i][1]))
+                B=document.getElementById(`${i+"."+pl[i][1]}`);
+                B.addEventListener("click",function(e){
+                    replay_mode=true;
+                    for(el of replay_move){el.style.backgroundColor="white"}
+                    e.target.style.backgroundColor="tan"
+                    if(X_FEN){FEN(X_FEN)}else{set_standard()}
+                    for (let k=0;k<=i;k++){
+                            if(ifin(pl[k][0][0],numbs)){
+                                whi=white(pl[k][0],"white");
+                                PGN_move_capture(whi.i,whi.j,whi.i2,whi.j2,whi.pro,div=false);
+                            }else{bla=black(pl[k][0],"black");
+                            PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
+                            }
+                         if(pl[k][1]){
+                            bla=black(pl[k][1],"black");
+                            PGN_move_capture(bla.i,bla.j,bla.i2,bla.j2,bla.pro,div=false);
+                        }
+                    } 
+                })
+            }
+        }
+}
 
 
 }

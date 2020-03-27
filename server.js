@@ -97,7 +97,7 @@ io.on('connection',function(s){
 
      })     
 
-
+ 
      s.on("game-request",function(gamedata){
         if(s.handshake.headers.cookie){
             let token= cookie.parse(s.handshake.headers.cookie).Usession;
@@ -190,12 +190,14 @@ io.on('connection',function(s){
                 }else{
                     move_data.st=r.d.st; 
                     if(s.request.connection.remoteAddress==r.ip1){
-                        r.d.t1.push(new Date(new Date()+r.d.initials.increment*1000))
+                        //r.d.t1.push(new Date(new Date()+r.d.initials.increment*1000))
+                        r.d.t1.push(new Date())
                         move_data.othertime=r.d.t1[r.d.t1.length-1];
                         move_data.mytime=r.d.t2[r.d.t2.length-1];        
 
                     }else if(s.request.connection.remoteAddress==r.ip2){
-                        r.d.t2.push(new Date(new Date()+r.d.initials.increment*1000) )
+                        //r.d.t2.push(new Date(new Date()+r.d.initials.increment*1000) )
+                        r.d.t2.push(new Date())
                         move_data.mytime=r.d.t1[r.d.t1.length-1];
                         move_data.othertime=r.d.t2[r.d.t2.length-1];
                     }
@@ -287,7 +289,7 @@ function lobby_matcher(s,gamedata,lobby,rated=true){
      }
 }
 
-
+ 
 function lobby_matcher2(s,gamedata,lobby){ //gamedata={gtype:..,grated:...}
     let match=false;
     

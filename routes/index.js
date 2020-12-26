@@ -10,7 +10,7 @@ const pool = new Pool({
     "host": "localhost",
     "port": 5432,
     "user":"postgres",
-    "password" : "EAfree",
+    "password" : "****",
     "database" : "fschess",
     "max": 20,
     "connectionTimeoutMillis" : 0,
